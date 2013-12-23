@@ -1,0 +1,28 @@
+-- DROP TABLE [File];
+-- GO
+
+DROP table [File1ê›íË];
+go
+
+-- --------------------------------------------------
+-- Creating all tables
+-- --------------------------------------------------
+
+-- Creating table 'File'
+CREATE TABLE [File] (
+    [ID] nvarchar(20) NOT NULL,
+    [Name] nvarchar(4000)  NOT NULL,
+    [CreateUser] nvarchar(4000)  NOT NULL,
+    [CreateDate] datetime  NOT NULL
+);
+GO
+
+-- --------------------------------------------------
+-- Creating all PRIMARY KEY constraints
+-- --------------------------------------------------
+
+-- Creating primary key on [ID] in table 'File'
+ALTER TABLE [File]
+ADD CONSTRAINT [PK_File]
+    PRIMARY KEY ([ID] );
+GO
