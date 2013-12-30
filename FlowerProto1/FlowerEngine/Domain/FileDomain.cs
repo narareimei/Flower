@@ -49,7 +49,7 @@ namespace FlowerEngine.Domain
                     //
 
                     // DBへの登録
-                    Regist2DB(filename);
+                    Regist2DB(filename, "dmy");
 
                     // 採番
 
@@ -76,7 +76,26 @@ namespace FlowerEngine.Domain
 
         #region private methods
 
-        private Model.File Regist2DB(string fileName)
+        private string getId()
+        {
+            string latestId = "";
+            string newId = "";
+
+            using (var entities = new Model.FlowerEntities())
+            {
+                latestId = (from e in entities.Files.AsEnumerable() select e.ID).Max();
+
+                if (entities.Files.Count() == 0)
+                {
+                    return "1";
+                }
+            }
+            // Next ID
+            newId = (decimal.Parse(latestId) + 1).ToString();
+            return newId;
+        }
+
+        private Model.File Regist2DB(string fileName, string id)
         {
             var fullpath = this.folder += fileName;
             var file = new Model.File();
@@ -85,8 +104,8 @@ namespace FlowerEngine.Domain
             {
                 using (var entities = new Model.FlowerEntities())
                 {
-
-                    file.Name = fileName;
+                    file.ID         = id;
+                    file.Name       = fileName;
                     file.CreateUser = "dmy";
                     file.CreateDate = DateTime.Now;
 
@@ -100,26 +119,6 @@ namespace FlowerEngine.Domain
             }
             return file ;
         }
-
-        private string getId()
-        {
-            string latestId = "";
-            string newId = "";
-
-            using (var entities = new Model.FlowerEntities())
-            {
-                latestId = (from e in entities.Files.AsEnumerable() select e.ID).Max();
-
-                if(entities.Files.Count() == 0)
-                {
-                    return "1";
-                }
-            }
-            // Next ID
-            newId = (decimal.Parse(latestId) + 1).ToString();
-            return newId;
-        }
-
         #endregion
 
     }

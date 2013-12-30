@@ -16,5 +16,11 @@ namespace Starter
         {
             InitializeComponent();
         }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            var data = AppDomain.CurrentDomain.GetData("DataDirectory");
+        }
     }
 }
+    

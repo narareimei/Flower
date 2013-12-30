@@ -26,23 +26,34 @@ namespace FlowerEngine.Domain
             return;
         }
 
+        [Test]
+        public void ID取得_レコードなし()
+        {
+            var domain = new FileDomain(@".\TestCase\FileStore\");
+
+            Assert.True(domain.getId() == "1");
+            return;
+        }
 
         [Test]
-        [ExpectedException(typeof(Exception))]
-        public void ファイル登録_ファイルなし()
+        public void ID取得_レコードあり()
         {
-            var domain = new FileDomain();
+            var domain = new FileDomain(@".\TestCase\FileStore\");
 
-            domain.Regist(@".\nothing.txt");
-            return ;
+            Model.File file = null;
+            file = domain.Regist2DB("Test_Text.txt", "1");
+            file = domain.Regist2DB("Test_Text.txt", "2");
+            Assert.True(domain.getId() == "3");
+            return;
         }
+
 
         [Test]
         public void ファイルDB登録()
         {
             var domain = new FileDomain(@".\TestCase\FileStore\");
 
-            var file = domain.Regist2DB("Test_Text.txt");
+            var file = domain.Regist2DB("Test_Text.txt", "TestId");
 
             Assert.True(file != null);
             using (var entities = new Model.FlowerEntities())
@@ -52,6 +63,38 @@ namespace FlowerEngine.Domain
             }
             return;
         }
+
+        [Test]
+        public void ファイルDB登録_連続登録()
+        {
+            var domain = new FileDomain(@".\TestCase\FileStore\");
+
+            var file = domain.Regist2DB("Test_Text.txt", "TestId01");
+                file = domain.Regist2DB("Test_Text.txt", "TestId02");
+
+            Assert.True(file != null);
+            using (var entities = new Model.FlowerEntities())
+            {
+                var cnt = (from e in entities.Files.AsEnumerable() where e.Name == "Test_Text.txt" select e).Count();
+                Assert.True(cnt == 2);
+            }
+            return;
+        }
+
+
+
+
+
+        [Test]
+        [ExpectedException(typeof(Exception))]
+        public void ファイル登録_ファイルなし()
+        {
+            var domain = new FileDomain();
+
+            domain.Regist(@".\nothing.txt");
+            return;
+        }
+
 
         [Test]
         public void ファイル登録()
