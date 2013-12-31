@@ -36,39 +36,33 @@ namespace FlowerEngine.Domain
                     throw new Exception("指定されたファイルは存在しません。");
                 }
             }
-            var filename = Path.GetFileName(filepath);
+            //var filename = Path.GetFileName(filepath);
 
-            using (var tran = new TransactionScope())
+            try
             {
-                try
+                // TODO
+                //
+                // 採番→ファイル複写→DB登録と本当はしたい
+                // で失敗時にはゴミファイルが出来る形がいい。
+                //
+                var newId = getId();
+                storeFile(filepath, newId);
+                using (var tran = new TransactionScope())
                 {
-                    // TODO
-                    //
-                    // 採番→ファイル複写→DB登録と本当はしたい
-                    // で失敗時にはゴミファイルが出来る形がいい。
-                    //
-
-                    // DBへの登録
-                    Regist2DB(filename, "dmy");
-
-                    // 採番
-
-                    // ファイルの複写
-
+                    Regist2DB(Path.GetFileName(filepath), newId);
                     tran.Complete();
                 }
-                catch
-                {
-                    // ロールバック
-                    //  do nothing
-
-                    // 管理ファイルの削除（できれば）
-                }
-                finally
-                {
-                }
             }
+            catch
+            {
+                // ロールバック
+                //  do nothing
 
+                // 管理ファイルの削除（できれば）
+            }
+            finally
+            {
+            }
              return;
          }
         #endregion
@@ -95,9 +89,17 @@ namespace FlowerEngine.Domain
             return newId;
         }
 
+
+        private void storeFile(string filepath, string id)
+        {
+            System.IO.File.Copy(filepath, this.folder + id + ".dat");
+            return;
+        }
+
+
         private Model.File Regist2DB(string fileName, string id)
         {
-            var fullpath = this.folder += fileName;
+            var fullpath = this.folder + fileName;
             var file = new Model.File();
 
             try

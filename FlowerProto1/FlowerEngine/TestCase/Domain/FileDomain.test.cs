@@ -26,6 +26,19 @@ namespace FlowerEngine.Domain
             return;
         }
 
+        [SetUp]
+        public void ファイルを一旦クリア()
+        {
+            var files = System.IO.Directory.GetFiles(@".\TestCase\FileStore\", "*.dat");
+
+            foreach (var file in files)
+            {
+                System.IO.File.Delete(file);
+            }
+            return;
+        }
+
+
         [Test]
         public void ID取得_レコードなし()
         {
@@ -46,6 +59,35 @@ namespace FlowerEngine.Domain
             Assert.True(domain.getId() == "3");
             return;
         }
+
+
+
+        [Test]
+        public void ファイル格納_1()
+        {
+            var domain      = new FileDomain(@".\TestCase\FileStore\");
+            var filepath    = @".\TestCase\Data\Test_Text.txt";
+            var id          = "1";
+
+            domain.storeFile(filepath,id);
+            Assert.True(System.IO.File.Exists(@".\TestCase\FileStore\1.dat") == true);
+            return;
+        }
+
+        [Test]
+        public void ファイル格納_2()
+        {
+            var domain = new FileDomain(@".\TestCase\FileStore\");
+            var filepath = @".\TestCase\Data\Test_Text.txt";
+            var id = "2";
+
+            domain.storeFile(filepath, id);
+            Assert.True(System.IO.File.Exists(@".\TestCase\FileStore\2.dat") == true);
+            return;
+        }
+
+
+
 
 
         [Test]
@@ -106,9 +148,24 @@ namespace FlowerEngine.Domain
             {
                 var latestFileId = (from e in entities.Files.AsEnumerable() select e.ID).Max();
                 Assert.True(latestFileId == "1");
+                Assert.True(System.IO.File.Exists(@".\TestCase\FileStore\1.dat") == true);
             }
-
         }
 
+        [Test]
+        public void ファイル登録_連続()
+        {
+            var domain = new FileDomain(@".\TestCase\FileStore\");
+
+            domain.Regist(@"TestCase\Data\Test_Text.txt");
+            domain.Regist(@"TestCase\Data\Test_Text.txt");
+            using (var entities = new Model.FlowerEntities())
+            {
+                var latestFileId = (from e in entities.Files.AsEnumerable() select e.ID).Max();
+                Assert.True(latestFileId == "2");
+            }
+            Assert.True(System.IO.File.Exists(@".\TestCase\FileStore\1.dat") == true);
+            Assert.True(System.IO.File.Exists(@".\TestCase\FileStore\2.dat") == true);
+        }
     }
 }
