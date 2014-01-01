@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 using System.Transactions;
 
 using NUnit.Framework;
-using FlowerEngine;
 
 namespace FlowerEngine.Domain
 {
@@ -26,8 +22,10 @@ namespace FlowerEngine.Domain
         }
 
         #region public methods
-        public void Regist(string filepath)
+        public string Regist(string filepath)
          {
+             string newId = "";
+
             // チェック
             {
                 if (System.IO.File.Exists(filepath) == false)
@@ -36,16 +34,14 @@ namespace FlowerEngine.Domain
                     throw new Exception("指定されたファイルは存在しません。");
                 }
             }
-            //var filename = Path.GetFileName(filepath);
 
             try
             {
-                // TODO
                 //
                 // 採番→ファイル複写→DB登録と本当はしたい
                 // で失敗時にはゴミファイルが出来る形がいい。
                 //
-                var newId = getId();
+                newId = getId();
                 storeFile(filepath, newId);
                 using (var tran = new TransactionScope())
                 {
@@ -63,8 +59,40 @@ namespace FlowerEngine.Domain
             finally
             {
             }
-             return;
-         }
+            return newId;
+        }
+
+        public Model.File Remove(string id)
+        {
+            if (id == null)
+            {
+                throw new Exception("Ivalid ID");
+            }
+
+            Model.File removedFile = null;
+            try
+            {
+                using (var tran = new TransactionScope())
+                {
+                    removedFile = removeFromDB(id);
+                    tran.Complete();
+                }
+                if (removedFile != null)
+                {
+                    removeFile(removedFile.ID);
+                }
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+            }
+            return removedFile;
+        }
+
+
         #endregion
 
 
@@ -96,7 +124,13 @@ namespace FlowerEngine.Domain
             return;
         }
 
-
+        /// <summary>
+        /// ファイル情報のDB登録
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <remarks>トランザクションは管理しない</remarks>
         private Model.File Regist2DB(string fileName, string id)
         {
             var fullpath = this.folder + fileName;
@@ -121,6 +155,35 @@ namespace FlowerEngine.Domain
             }
             return file ;
         }
+
+        private void removeFile(string id)
+        {
+            System.IO.File.Delete(this.folder + id + ".dat");
+            return;
+        }
+
+        /// <summary>
+        /// DBからのファイル情報削除
+        /// </summary>
+        /// <param name="id"></param>
+        /// <remarks>トランザクションは管理しない</remarks>
+        private Model.File removeFromDB(string id)
+        {
+            Model.File removedFile = null;
+
+            using (var entities = new Model.FlowerEntities())
+            {
+                var target = (from e in entities.Files.AsEnumerable() where e.ID == id select e);
+
+                if(target != null && target.Count() > 0) {
+                    removedFile = entities.Files.Remove(target.ElementAt(0));
+                    entities.SaveChanges();
+                }
+            }
+            return removedFile;
+        }
+
+
         #endregion
 
     }

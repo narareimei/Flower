@@ -143,11 +143,12 @@ namespace FlowerEngine.Domain
         {
             var domain = new FileDomain(@".\TestCase\FileStore\");
 
-            domain.Regist(@"TestCase\Data\Test_Text.txt");
+            var newId = domain.Regist(@"TestCase\Data\Test_Text.txt");
             using (var entities = new Model.FlowerEntities())
             {
                 var latestFileId = (from e in entities.Files.AsEnumerable() select e.ID).Max();
                 Assert.True(latestFileId == "1");
+                Assert.True(newId        == "1");
                 Assert.True(System.IO.File.Exists(@".\TestCase\FileStore\1.dat") == true);
             }
         }
@@ -167,5 +168,52 @@ namespace FlowerEngine.Domain
             Assert.True(System.IO.File.Exists(@".\TestCase\FileStore\1.dat") == true);
             Assert.True(System.IO.File.Exists(@".\TestCase\FileStore\2.dat") == true);
         }
+
+
+        [Test]
+        public void ファイル削除()
+        {
+            var domain = new FileDomain(@".\TestCase\FileStore\");
+
+            var newId = domain.Regist(@"TestCase\Data\Test_Text.txt");
+            domain.removeFile(newId);
+            Assert.True(System.IO.File.Exists(@".\TestCase\FileStore\1.dat") == false);
+            return; 
+        }
+
+        [Test]
+        public void ファイル削除DB()
+        {
+            var domain = new FileDomain(@".\TestCase\FileStore\");
+
+            var newId = domain.Regist(@"TestCase\Data\Test_Text.txt");
+            domain.removeFromDB(newId);
+            using (var entities = new Model.FlowerEntities())
+            {
+                Assert.True(entities.Files.Count() == 0);
+            }
+            return;
+        }
+
+        [Test]
+        public void ファイル削除_１つ()
+        {
+            var domain = new FileDomain(@".\TestCase\FileStore\");
+            var newId = domain.Regist(@"TestCase\Data\Test_Text.txt");
+
+           var file =  domain.Remove(newId);
+
+            Assert.True(System.IO.File.Exists(@".\TestCase\FileStore\1.dat") == false);
+            using (var entities = new Model.FlowerEntities())
+            {
+                Assert.True(entities.Files.Count() == 0);
+            }
+
+            Assert.True(file.ID == "1");
+            return;
+        }
+
+
+
     }
 }
