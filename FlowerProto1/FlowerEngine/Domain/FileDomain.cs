@@ -2,6 +2,10 @@
 using System.Linq;
 using System.IO;
 using System.Transactions;
+using System.Data.Common;
+using System.Configuration;
+using System.Data;
+using System.Data.EntityClient;
 
 using NUnit.Framework;
 
@@ -72,9 +76,10 @@ namespace FlowerEngine.Domain
             Model.File removedFile = null;
             try
             {
+                var conn = CreateDbConnection();
                 using (var tran = new TransactionScope())
                 {
-                    removedFile = removeFromDB(id);
+                    removedFile = removeFromDB(id, conn);
                     tran.Complete();
                 }
                 if (removedFile != null)
@@ -167,9 +172,10 @@ namespace FlowerEngine.Domain
         /// </summary>
         /// <param name="id"></param>
         /// <remarks>トランザクションは管理しない</remarks>
-        private Model.File removeFromDB(string id)
+        private Model.File removeFromDB(string id, DbConnection conn)
         {
             Model.File removedFile = null;
+
 
             using (var entities = new Model.FlowerEntities())
             {
@@ -183,6 +189,90 @@ namespace FlowerEngine.Domain
             return removedFile;
         }
 
+
+        // Retrieve a connection string by specifying the providerName.
+        // Assumes one connection string per provider in the config file.
+        static string GetConnectionStringByProvider(string providerName)
+        {
+            // Return null on failure.
+            string returnValue = null;
+
+            // Get the collection of connection strings.
+            ConnectionStringSettingsCollection settings =
+                ConfigurationManager.ConnectionStrings;
+
+            // Walk through the collection and return the first 
+            // connection string matching the providerName.
+            if (settings != null)
+            {
+                foreach (ConnectionStringSettings cs in settings)
+                {
+                    if (cs.ProviderName == providerName)
+                    {
+                        returnValue = cs.ConnectionString;
+                        break;
+                    }
+                }
+            }
+            return returnValue;
+        }
+
+
+        // Given a provider name and connection string, 
+        // create the DbProviderFactory and DbConnection.
+        // Returns a DbConnection on success; null on failure.
+        static DbConnection CreateDbConnection()
+        {
+            // Assume failure.
+            DbConnection connection = null;
+
+            // Create the DbProviderFactory and DbConnection.
+            string entityConnectionString = ConfigurationManager.ConnectionStrings["FlowerEntities"].ConnectionString;
+            string connectionString = new EntityConnectionStringBuilder(entityConnectionString).ProviderConnectionString;
+            string providerName = new EntityConnectionStringBuilder(entityConnectionString).Provider;
+
+            if (connectionString != null)
+            {
+                try
+                {
+                    DbProviderFactory factory =
+                        DbProviderFactories.GetFactory(providerName);
+
+
+                    //connectionString = @"data source=|DataDirectory|\DataBase\Flower.sdf";
+                    connection = factory.CreateConnection();
+                    connection.ConnectionString = connectionString;
+                }
+                catch (Exception ex)
+                {
+                    // Set the connection to null if it was created.
+                    if (connection != null)
+                    {
+                        connection = null;
+                    }
+                    Console.WriteLine(ex.Message);
+                }
+            }
+            // Return the connection.
+            return connection;
+        }
+
+        // This example assumes a reference to System.Data.Common.
+        static DataTable GetProviderFactoryClasses()
+        {
+            // Retrieve the installed providers and factories.
+            DataTable table = DbProviderFactories.GetFactoryClasses();
+
+            // Display each row and column value.
+            foreach (DataRow row in table.Rows)
+            {
+                foreach (DataColumn column in table.Columns)
+                {
+                    Console.WriteLine(row[column]);
+                }
+            }
+            return table;
+        }
 
         #endregion
 

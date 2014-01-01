@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Configuration;
+using System.Data.EntityClient;
 using NUnit.Framework;
 using FlowerEngine;
 
@@ -187,7 +189,7 @@ namespace FlowerEngine.Domain
             var domain = new FileDomain(@".\TestCase\FileStore\");
 
             var newId = domain.Regist(@"TestCase\Data\Test_Text.txt");
-            domain.removeFromDB(newId);
+            domain.removeFromDB(newId, null);
             using (var entities = new Model.FlowerEntities())
             {
                 Assert.True(entities.Files.Count() == 0);
@@ -212,8 +214,5 @@ namespace FlowerEngine.Domain
             Assert.True(file.ID == "1");
             return;
         }
-
-
-
     }
 }
