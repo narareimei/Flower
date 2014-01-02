@@ -187,9 +187,12 @@ namespace FlowerEngine.Domain
         public void ファイル削除DB()
         {
             var domain = new FileDomain(@".\TestCase\FileStore\");
-
             var newId = domain.Regist(@"TestCase\Data\Test_Text.txt");
-            domain.removeFromDB(newId, null);
+
+            var cn = new EntityConnection("name=FlowerEntities");
+            cn.Open();
+
+            domain.removeFromDB(newId, cn);
             using (var entities = new Model.FlowerEntities())
             {
                 Assert.True(entities.Files.Count() == 0);

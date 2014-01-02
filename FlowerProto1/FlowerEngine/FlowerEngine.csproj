@@ -98,6 +98,7 @@
     <Compile Include="Model\File.cs">
       <DependentUpon>FlowerModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Model\FlowerModel.constructor.cs" />
     <Compile Include="Model\FlowerModel.Context.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
