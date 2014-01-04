@@ -90,6 +90,7 @@
     <ProjectReference Include="..\FlowerEngine\FlowerEngine.csproj">
       <Project>{89dcadbb-2c7c-42b8-9001-f0845012a29e}</Project>
       <Name>FlowerEngine</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
