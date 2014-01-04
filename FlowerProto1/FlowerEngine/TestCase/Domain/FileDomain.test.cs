@@ -217,5 +217,30 @@ namespace FlowerEngine.Domain
             Assert.True(file.ID == "1");
             return;
         }
+
+        [Test]
+        public void 情報取得()
+        {
+            var domain = new FileDomain(@".\TestCase\FileStore\");
+            var newId = domain.Regist(@"TestCase\Data\Test_Text.txt");
+
+            var file = domain.GetFile(newId);
+            Assert.True(file != null);
+            Assert.True(file.ID == newId);
+            Assert.True(file.Name == "Test_Text.txt");
+
+            return;
+        }
+
+        [Test]
+        public void 情報取得_パス()
+        {
+            var domain = new FileDomain(@".\TestCase\FileStore\");
+            var newId = domain.Regist(@"TestCase\Data\Test_Text.txt");
+
+            var path = domain.GetFilePath(newId);
+            Assert.True(path.ToUpper() == @".\TestCase\FileStore\1.dat".ToUpper());
+            return;
+        }
     }
 }

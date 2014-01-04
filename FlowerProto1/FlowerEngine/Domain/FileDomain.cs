@@ -99,6 +99,26 @@ namespace FlowerEngine.Domain
             return removedFile;
         }
 
+        public Model.File GetFile(string id)
+        {
+            Model.File file = null;
+            using (var entities = new Model.FlowerEntities())
+            {
+                file = (Model.File)(from e in entities.Files.AsEnumerable() where e.ID == id select e).Single();
+            }
+            return file;
+        }
+
+        public string GetFilePath(string id)
+        {
+            var file = GetFile(id);
+
+            if (file != null)
+            {
+                return this.folder + file.ID + ".dat";
+            }
+            return "";
+        }
 
         #endregion
 
